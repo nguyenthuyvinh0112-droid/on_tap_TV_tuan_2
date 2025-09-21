@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trắc nghiệm Ôn bài - Cô Thuỳ Vinh</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            font-weight: bold;
+            color: darkblue;
+            overflow: hidden;
+            background-color: #e6f7ff;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .header marquee {
+            font-size: 1.5em;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 5px solid #007bff;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .question-block p {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .options div {
+            margin-bottom: 10px;
+        }
+        .options label {
+            display: block;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .options label:hover {
+            background-color: #d4dfe8;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        .hint-button {
+            background-color: #ffc107;
+            color: #333;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .hint-content {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        .control-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        #retry-btn, #review-btn {
+            display: none;
+            background-color: #28a745;
+        }
+        #review-btn {
+            background-color: #17a2b8;
+        }
+        #retry-btn:hover {
+            background-color: #218838;
+        }
+        #review-btn:hover {
+            background-color: #138496;
+        }
+        .results-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background-color: #e2f0d9;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .results-container h2 {
+            color: #155724;
+        }
+        .results-container p {
+            font-size: 1.2em;
+        }
+        #conclusion {
+            text-align: left;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            color: #721c24;
+        }
+        .correct-answer {
+            background-color: #d4edda !important; /* Green for correct */
+            border: 2px solid #28a745;
+        }
+        .incorrect-answer {
+            background-color: #f8d7da !important; /* Red for incorrect */
+            border: 2px solid #dc3545;
+        }
+        .correct-choice {
+            font-weight: bold;
+            color: #155724;
+        }
+        .incorrect-choice {
+            font-weight: bold;
+            color: #721c24;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <marquee behavior="scroll" direction="left">
+            <b>Design by cô Thuỳ Vinh</b>
+        </marquee>
+    </div>
+
+    <div class="quiz-container" id="quiz-container">
+        <h1>Bài ôn tập: Tiếng Việt - Tuần 1, Bài 2: Về thăm quê</h1>
+        <form id="quiz-form"></form>
+        <div class="control-buttons">
+            <button type="button" class="btn" id="submit-btn">Nộp bài</button>
+            <button type="button" class="btn" id="review-btn">Xem lại bài làm</button>
+            <button type="button" class="btn" id="retry-btn">Làm lại bài</button>
+        </div>
+    </div>
+
+    <div class="results-container" id="results-container">
+        <h2>Kết quả bài làm</h2>
+        <p id="score-text"></p>
+        <p id="feedback-text"></p>
+        <div id="conclusion" style="display:none;">
+            <h3>Lưu ý và dặn dò của cô:</h3>
+            <p id="conclusion-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Bạn nhỏ thích gì nhất khi nghỉ hè?",
+                options: ["Về quê thăm mộ tổ tông", "Về quê leo núi", "Được theo mẹ về quê", "Đi công viên nước trong thành phố"],
+                answer: "Được theo mẹ về quê",
+                hint: "Em hãy đọc lại những dòng thơ đầu tiên của bài thơ nhé!",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Cảm xúc của bà khi thấy bạn nhỏ đến là gì?",
+                options: ["Vui mừng", "Buồn bã", "Thăng hoa", "Buồn vui lẫn lộn"],
+                answer: "Vui mừng",
+                hint: "Khi gặp lại người thân yêu, chúng ta thường có cảm xúc gì nhỉ?",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Tác giả của bài thơ là ai?",
+                options: ["Thanh Hải", "Xuân Hoài", "Tế Hanh", "Bùi Xuân Phái"],
+                answer: "Xuân Hoài",
+                hint: "Thông tin này thường được ghi ngay dưới tên bài thơ đó các em.",
+                topic: "Tác giả - Tác phẩm"
+            },
+            {
+                question: "Bạn nhỏ nhận thấy điều gì về ngoại hình của bà qua năm tháng?",
+                options: ["Gầy đi", "Béo lên", "Trẻ trung ra", "Già nua"],
+                answer: "Gầy đi",
+                hint: "Hãy tìm câu thơ miêu tả hình dáng của bà trong bài.",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Tại sao vườn có nhiều quả nhưng chẳng mấy lúc bà ăn?",
+                options: ["Vì bà không thích ăn những loại quả đó", "Vì bà không còn răng", "Vì bà muốn để cho mẹ cháu về hái đem lên thành phố bán", "Vì bà muốn để dành cho cháu về hái"],
+                answer: "Vì bà muốn để dành cho cháu về hái",
+                hint: "Tình yêu thương của bà được thể hiện qua hành động nào trong vườn?",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Khổ thơ cuối có nội dung gì?",
+                options: ["Tốc độ quạt tay của bà rất nhanh vì thế cháu thấy còn mát hơn cả quạt máy", "Những hành động thể hiện sự chăm lo, yêu thương của bà dành cho cháu", "Mùi hương nồng nàn của cỏ cây", "Tất cả các đáp án trên."],
+                answer: "Những hành động thể hiện sự chăm lo, yêu thương của bà dành cho cháu",
+                hint: "Khổ thơ cuối nói về hành động bà quạt cho cháu ngủ và hương thơm từ vườn. Tất cả những điều đó thể hiện điều gì?",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+             {
+                question: "Trong hình ảnh một nhóm người đang ngồi nói chuyện, đáp án nào sau đây chỉ chứa từ ngữ chỉ hoạt động?",
+                options: ["nói chuyện, bàn luận, da đen", "thảo luận, cốc ly, đèn", "tĩnh mịch, tối tăm, ngồi chơi", "nói chuyện, ngồi, suy nghĩ"],
+                answer: "nói chuyện, ngồi, suy nghĩ",
+                hint: "Từ chỉ hoạt động là từ trả lời cho câu hỏi 'Làm gì?'. Em hãy tìm các từ như vậy trong các đáp án.",
+                topic: "Kiến thức Tiếng Việt (Từ và câu)"
+            },
+            {
+                question: "Câu nào sau đây là câu giới thiệu?",
+                options: ["Captain America chỉ có thể đánh hoà chứ không thể thắng nổi Iron Man.", "Loài chim này bay hàng ngàn kilometer từ phương Bắc xuống phương Nam để tránh rét.", "Lục Tiểu Linh Đồng là diễn viên đóng vai Tôn Ngộ Không trong Tây Du Ký 1986.", "Tôi không cần phải làm thế."],
+                answer: "Lục Tiểu Linh Đồng là diễn viên đóng vai Tôn Ngộ Không trong Tây Du Ký 1986.",
+                hint: "Câu giới thiệu thường có từ 'là' để giới thiệu về một người, một vật nào đó.",
+                topic: "Kiến thức Tiếng Việt (Từ và câu)"
+            },
+            {
+                question: "Tác giả của bài “Đi tàu Thống Nhất” (sgk tr.16) đã liên tưởng tiếng tàu kêu xình xịch với điều gì?",
+                options: ["Không liên tưởng đến điều gì", "Những tiếng kêu inh tai, nhức óc", "Tiếng đu võng ở nhà", "Việc tấu nhạc"],
+                answer: "Việc tấu nhạc",
+                hint: "Hãy nhớ lại chi tiết so sánh âm thanh của con tàu trong bài đọc nhé.",
+                topic: "Đọc hiểu bài 'Đi tàu Thống Nhất'"
+            },
+            {
+                question: "Bài thơ “Về thăm quê” viết về điều gì?",
+                options: ["Chuyến thăm quê ở nhà bà của một bạn nhỏ", "Chuyến du xuân của một gia đình", "Ấn tượng quê hương", "Nỗi lòng người xa quê"],
+                answer: "Chuyến thăm quê ở nhà bà của một bạn nhỏ",
+                hint: "Ngay từ tên bài thơ và nội dung chính, em có thể đoán được chủ đề của bài.",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Tình cảm của bà dành cho cháu qua bài thơ được thể hiện như thế nào?",
+                options: ["Bà vui mừng khi thấy cháu về quê, bà luôn để dành những thứ tốt đẹp nhất cho cháu, bà luôn muốn chăm lo cho cháu.", "Bà dắt cháu đi chơi ở khắp vùng quê của bà, đưa cháu đi ăn những món ăn đặc sản.", "Bà luôn cảm thấy buồn khi không được ở cùng cháu nên khi cháu về bà thấy rất vui, bà làm mọi thứ cho cháu.", "Tất cả các đáp án trên."],
+                answer: "Bà vui mừng khi thấy cháu về quê, bà luôn để dành những thứ tốt đẹp nhất cho cháu, bà luôn muốn chăm lo cho cháu.",
+                hint: "Hãy tổng hợp các hành động của bà: mừng vui, để dành quả, quạt cho cháu ngủ.",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Câu thơ “Từ tay bà gió đến” được hiểu như thế nào?",
+                options: ["Từ vị trí của tay, một bà gió (thần gió) bay đến.", "Nhờ tay của bà quạt, gió thổi vào cháu.", "Bà gió (thần gió) bay đến khi bà vung tay làm phép", "Tay bà đặc biệt, có thể tự tạo ra gió"],
+                answer: "Nhờ tay của bà quạt, gió thổi vào cháu.",
+                hint: "Đây là một cách nói hình ảnh. Hành động thực tế của bà là gì để tạo ra gió?",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Câu thơ “Thơm bao hương quả vườn” đã được tác giả thay đổi cú pháp thông thường như nào?",
+                options: ["Không có thay đổi gì", "Đặt phần chủ ngữ lên trước phần vị ngữ", "Đảo lộn tung cấu trúc câu nhưng vẫn có tính hợp lí", "Đặt phần vị ngữ lên trước chủ ngữ."],
+                answer: "Đặt phần vị ngữ lên trước chủ ngữ.",
+                hint: "Cách nói thông thường là 'Bao hương quả vườn thơm'. Tác giả đã đảo từ nào lên đầu câu?",
+                topic: "Kiến thức Tiếng Việt (Từ và câu)"
+            },
+            {
+                question: "Ý nghĩa của bài thơ là gì?",
+                options: ["Hãy yêu quý quê hương, gia đình, trân trọng những gì mà người khác dành cho mình.", "Hãy yêu bà để bà cho ăn ngon, mặc đẹp, lo cho từng bữa cơm giấc ngủ.", "Hãy về quê để biết yêu quê hương hơn.", "Bài thơ quá ngắn chưa đủ sức nói lên ý nghĩa gì cả."],
+                answer: "Hãy yêu quý quê hương, gia đình, trân trọng những gì mà người khác dành cho mình.",
+                hint: "Bài thơ không chỉ nói về tình bà cháu mà còn gợi lên tình cảm rộng lớn hơn là tình yêu gia đình và quê hương.",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Từ “thần sấm” chỉ gì?",
+                options: ["Chỉ người", "Chỉ sự vật", "Chỉ con vật", "Cả A và B đều đúng."],
+                answer: "Cả A và B đều đúng.",
+                hint: "'Thần Sấm' có thể là một vị thần trong truyện (chỉ người) hoặc chỉ hiện tượng sấm sét (chỉ sự vật).",
+                topic: "Kiến thức Tiếng Việt (Từ và câu)"
+            },
+            {
+                question: "Thể thơ trong bài là thể thơ gì?",
+                options: ["Thơ bốn chữ", "Thơ lục bát", "Thơ tự do", "Thơ năm chữ"],
+                answer: "Thơ năm chữ",
+                hint: "Hãy đếm số chữ (tiếng) trong mỗi dòng thơ nhé.",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Cặp câu nào sau đây có nội dung mang tính đối lập, tương phản?",
+                options: ["Bà em cũng mừng ghê / Khi thấy em vào ngõ", "Mảnh vườn quê bé nhỏ / Bao nhiêu là thứ cây", "Bà bảo thích để dành / Cho cháu về ra hái", "Thoáng nghe bà kể chuyện / Gió thơm say chập chờn."],
+                answer: "Mảnh vườn quê bé nhỏ / Bao nhiêu là thứ cây",
+                hint: "Sự đối lập được thể hiện giữa 'bé nhỏ' và 'bao nhiêu' (rất nhiều).",
+                topic: "Đọc hiểu bài 'Về thăm quê'"
+            },
+            {
+                question: "Điều gì khiến cho bài “Đi tàu Thống Nhất” (sgk tr.16) trở nên hấp dẫn, thú vị?",
+                options: ["Tác giả cảm thấy đi tàu êm như ru, có cảm tượng không phải đang đi tàu mà là đang trên một con thuyền lặng lờ trôi giữa dòng sông tuyệt đẹp.", "Tác giả liên tưởng những gì thấy được qua cánh cửa sổ của toa tàu như một thước phim về mọi cảnh đẹp của quê hương đất nước cộng thêm cách dùng từ ngữ giàu trí tưởng tượng.", "Cả A và B.", "Tác giả thể hiện được cảm xúc yêu mến với con tàu bằng những từ ngữ đặc sắc, giàu tính nhân văn."],
+                answer: "Tác giả liên tưởng những gì thấy được qua cánh cửa sổ của toa tàu như một thước phim về mọi cảnh đẹp của quê hương đất nước cộng thêm cách dùng từ ngữ giàu trí tưởng tượng.",
+                hint: "Sự hấp dẫn của bài văn đến từ cách tác giả quan sát và miêu tả cảnh vật qua ô cửa tàu.",
+                topic: "Đọc hiểu bài 'Đi tàu Thống Nhất'"
+            },
+            {
+                question: "“Bạn tôi đang cố gắng nói với họ là cậu ấy không phải người xấu.” là loại câu gì?",
+                options: ["Câu giới thiệu", "Câu nêu hoạt động", "Câu cảm thán", "Câu tranh luận"],
+                answer: "Câu nêu hoạt động",
+                hint: "Câu này kể về hành động 'cố gắng nói' của nhân vật 'bạn tôi'.",
+                topic: "Kiến thức Tiếng Việt (Từ và câu)"
+            },
+            {
+                question: "Câu nào trong bài “Đi tàu Thống Nhất” (sgk tr.16) cho em biết rằng nhân vật chính đã ngủ rất lâu?",
+                options: ["Đi tàu Thống Nhất khoái cực kì!", "Đêm trước, tôi cùng bố mẹ lên tàu ở ga Hàng Cỏ - Hà Nội.", "Chẳng nhớ là tôi đã ngủ mấy đêm, mấy giấc, năm, mười, mười lăm, hai mươi,... mở mắt ra đã thấy thành phố Hồ Chí Minh sáng bạch.", "Tàu chạy lâu quá, tôi hỏi mẹ, mẹ bảo phải hơn một ngày mới vào đến trong đó, con cứ ngủ đi."],
+                answer: "Chẳng nhớ là tôi đã ngủ mấy đêm, mấy giấc, năm, mười, mười lăm, hai mươi,... mở mắt ra đã thấy thành phố Hồ Chí Minh sáng bạch.",
+                hint: "Hãy tìm câu văn thể hiện sự mơ hồ về thời gian do ngủ quá nhiều.",
+                topic: "Đọc hiểu bài 'Đi tàu Thống Nhất'"
+            },
+            {
+                question: "Khổ cuối của bài thơ có điểm gì hay và độc đáo?",
+                options: ["Khổ cuối cho thấy bà thật sự rất quan tâm đến cháu, không chỉ để dành quả cho cháu, mà mỗi khi cháu chạy nhảy ra mồ hôi là bà lại theo quạt mát cho cháu. Đó là một tình cảm ấm áp.", "Câu cuối “Gió thơm say chập chờn” rất đặc biệt khi nó cho thấy rằng cháu có cảm giác mê say khi nhận được làn gió thơm mát mà quên cả việc nghe bà kể chuyện. Đó là một sự quan sát tinh tế của tác giả.", "Câu “Thơm bao hương quả vườn” rất hay khi nó mô tả hương thơm mang sắc màu quê hương của vườn hoa quả hoà vào luồng gió bà quạt cho cháu. Việc đảo từ “thơm” lên đầu càng nhấn mạnh điều đó, vừa làm cho từ “vườn” ở cuối câu vần với “chờn” ở câu cuối bài, đảm bảo tính thơ. Câu thơ thực sự có tính kết nối rất cao.", "Tất cả các đáp án trên."],
+                answer: "Câu “Thơm bao hương quả vườn” rất hay khi nó mô tả hương thơm mang sắc màu quê hương của vườn hoa quả hoà vào luồng gió bà quạt cho cháu. Việc đảo từ “thơm” lên đầu càng nhấn mạnh điều đó, vừa làm cho từ “vườn” ở cuối câu vần với “chờn” ở câu cuối bài, đảm bảo tính thơ. Câu thơ thực sự có tính kết nối rất cao.",
+                hint: "Hãy phân tích nghệ thuật dùng từ, đảo ngữ và vần điệu trong các câu thơ cuối.",
+                topic: "Cảm thụ văn học"
+            },
+            {
+                question: "Chú ý vào hai đoạn thơ 2 và 3, em có thể thấy rằng người bà luôn làm việc vất vả nhưng lại luôn muốn dành hoa thơm quả ngọt cho con cháu mà chính mình thì lại không hưởng thụ nhiều. Liên hệ với thực tế, ta có thể nhận xét gì về điều này?",
+                options: ["Đó là một phẩm chất đáng quý, một tình yêu thương vô bờ đối của rất nhiều người làm cha, làm mẹ thế hệ trước đây dành cho con cái.", "Đó là những phẩm chất tốt đẹp của cha mẹ theo quy chuẩn, quy tắc xã hội. Họ làm vậy không chỉ vì tình thương mà còn vì cách đánh giá của xã hội đương thời.", "Gian khó đã làm cho sự tận hưởng của những bậc làm cha mẹ chỉ muốn yêu thương con cái nhiều hơn thay vì cho bản thân mình.", "Không nhận xét nổi vì nó quá đặc biệt."],
+                answer: "Đó là một phẩm chất đáng quý, một tình yêu thương vô bờ đối của rất nhiều người làm cha, làm mẹ thế hệ trước đây dành cho con cái.",
+                hint: "Sự hi sinh và tình yêu thương của bà thể hiện một phẩm chất cao đẹp của con người Việt Nam.",
+                topic: "Cảm thụ văn học"
+            },
+            {
+                question: "Có ý kiến cho rằng “Bài thơ thể hiện tình cảm của bà dành cho cháu cũng như tình cảm của cháu dành cho bà.” Ta có thể đáp lời ý kiến này như thế nào?",
+                options: ["Đúng vậy. Dù chỉ là đoạn trích nhưng tác giả đã nói rõ quan điểm của hai người với nhau.", "Đúng vậy. Tình cảm của bà dành cho cháu thì đã quá rõ ràng còn tình cảm của cháu dành cho bà chưa được nói hẳn vào trong bài nhưng ta có thể thấy rằng việc tác giả mở đầu bài thơ bằng niềm vui của cháu khi về quê và những đoạn sau nói về hoạt động ở quê đã chứng minh cho điều đó. Hiểu đơn giản, nếu cháu không yêu bà, cháu dù về quê cũng không muốn kể lại những trải nghiệm khi ở với bà.", "Không đúng. Qua bài thơ, ta chỉ nhận thấy tình yêu thương của bà dành cho cháu còn cháu chỉ biết hưởng thụ mà không làm gì cả. Bà dường như đang muốn lợi dụng cháu để hàng xóm biết bà là người tốt, yêu con cháu và nhân cơ hội đó giúp bà được con đưa lên thành phố ở.", "Không đúng cũng không sai. Thực sự đoạn trích chưa đủ dữ kiện để đánh giá được vấn đề."],
+                answer: "Đúng vậy. Tình cảm của bà dành cho cháu thì đã quá rõ ràng còn tình cảm của cháu dành cho bà chưa được nói hẳn vào trong bài nhưng ta có thể thấy rằng việc tác giả mở đầu bài thơ bằng niềm vui của cháu khi về quê và những đoạn sau nói về hoạt động ở quê đã chứng minh cho điều đó. Hiểu đơn giản, nếu cháu không yêu bà, cháu dù về quê cũng không muốn kể lại những trải nghiệm khi ở với bà.",
+                hint: "Tình cảm của bạn nhỏ được thể hiện một cách gián tiếp qua niềm vui, sự háo hức khi về quê và sự trân trọng những kỷ niệm bên bà.",
+                topic: "Cảm thụ văn học"
+            }
+        ];
+
+        let shuffledQuestions = [];
+        let userAnswers = {};
+
+        const quizForm = document.getElementById('quiz-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const retryBtn = document.getElementById('retry-btn');
+        const reviewBtn = document.getElementById('review-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const quizContainer = document.getElementById('quiz-container');
+        const scoreText = document.getElementById('score-text');
+        const feedbackText = document.getElementById('feedback-text');
+        const conclusionDiv = document.getElementById('conclusion');
+        const conclusionText = document.getElementById('conclusion-text');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function buildQuiz() {
+            userAnswers = {};
+            quizForm.innerHTML = '';
+            shuffledQuestions = [...quizData];
+            shuffleArray(shuffledQuestions);
+
+            shuffledQuestions.forEach((currentQuestion, questionNumber) => {
+                const optionsHtml = currentQuestion.options.map((option, index) =>
+                    `<div>
+                        <label for="q${questionNumber}_option${index}">
+                            <input type="radio" name="question${questionNumber}" id="q${questionNumber}_option${index}" value="${option}">
+                            ${option}
+                        </label>
+                    </div>`
+                ).join('');
+
+                const questionBlock = document.createElement('div');
+                questionBlock.classList.add('question-block');
+                questionBlock.innerHTML = `
+                    <p>${questionNumber + 1}. ${currentQuestion.question}</p>
+                    <div class="options">${optionsHtml}</div>
+                    <button type="button" class="hint-button" onclick="toggleHint(${questionNumber})">Gợi ý</button>
+                    <div class="hint-content" id="hint${questionNumber}">${currentQuestion.hint}</div>
+                `;
+                quizForm.appendChild(questionBlock);
+            });
+            
+            // Re-enable radio buttons
+            const radioButtons = quizForm.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => radio.disabled = false);
+
+            // Reset styles
+            const labels = quizForm.querySelectorAll('label');
+            labels.forEach(label => {
+                label.classList.remove('correct-answer', 'incorrect-answer');
+            });
+        }
+        
+        function toggleHint(questionNumber) {
+            const hint = document.getElementById(`hint${questionNumber}`);
+            if (hint.style.display === "block") {
+                hint.style.display = "none";
+            } else {
+                hint.style.display = "block";
+            }
+        }
+
+        function showResults() {
+            let score = 0;
+            const incorrectTopics = new Set();
+            
+            shuffledQuestions.forEach((currentQuestion, questionNumber) => {
+                const answerContainer = quizForm.querySelector(`input[name="question${questionNumber}"]:checked`);
+                const userAnswer = answerContainer ? answerContainer.value : undefined;
+                userAnswers[questionNumber] = userAnswer;
+                
+                if (userAnswer === currentQuestion.answer) {
+                    score++;
+                } else {
+                    incorrectTopics.add(currentQuestion.topic);
+                }
+            });
+
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            submitBtn.style.display = 'none';
+            retryBtn.style.display = 'inline-block';
+            reviewBtn.style.display = 'inline-block';
+
+            scoreText.innerText = `Các em đã trả lời đúng ${score} trên tổng số ${shuffledQuestions.length} câu hỏi.`;
+            
+            if (score === shuffledQuestions.length) {
+                feedbackText.innerText = "🎉 Xuất sắc! Các em đã nắm rất vững bài học. Cô rất tự hào!";
+                conclusionDiv.style.display = 'none';
+            } else if (score >= shuffledQuestions.length * 0.7) {
+                feedbackText.innerText = "👍 Rất tốt! Các em đã hiểu bài. Cố gắng thêm một chút nữa nhé!";
+            } else {
+                feedbackText.innerText = "🤔 Cần cố gắng hơn nhé! Hãy xem lại các câu sai để rút kinh nghiệm.";
+            }
+
+            if (incorrectTopics.size > 0) {
+                let conclusionMsg = "Các em cần xem lại các phần kiến thức sau đây nhé: <ul>";
+                incorrectTopics.forEach(topic => {
+                    conclusionMsg += `<li>${topic}</li>`;
+                });
+                conclusionMsg += "</ul>";
+                conclusionText.innerHTML = conclusionMsg;
+                conclusionDiv.style.display = 'block';
+            } else if (score < shuffledQuestions.length) {
+                conclusionDiv.style.display = 'none';
+            }
+        }
+
+        function reviewAnswers() {
+            quizContainer.style.display = 'block';
+            const radioButtons = quizForm.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => radio.disabled = true);
+
+            shuffledQuestions.forEach((currentQuestion, questionNumber) => {
+                const options = quizForm.querySelectorAll(`input[name="question${questionNumber}"]`);
+                options.forEach(option => {
+                    const label = option.parentElement;
+                    label.classList.remove('correct-answer', 'incorrect-answer'); // Reset first
+                    
+                    if (option.value === currentQuestion.answer) {
+                        label.classList.add('correct-answer');
+                    }
+                    
+                    if (option.value === userAnswers[questionNumber] && userAnswers[questionNumber] !== currentQuestion.answer) {
+                        label.classList.add('incorrect-answer');
+                    }
+                });
+            });
+             window.scrollTo(0, 0); // Scroll to top to see first question
+        }
+
+        function retryQuiz() {
+            resultsContainer.style.display = 'none';
+            quizContainer.style.display = 'block';
+            submitBtn.style.display = 'inline-block';
+            retryBtn.style.display = 'none';
+            reviewBtn.style.display = 'none';
+            conclusionDiv.style.display = 'none';
+            buildQuiz();
+        }
+
+        submitBtn.addEventListener('click', showResults);
+        retryBtn.addEventListener('click', retryQuiz);
+        reviewBtn.addEventListener('click', reviewAnswers);
+
+        // Initial build
+        buildQuiz();
+    </script>
+
+</body>
+</html>
